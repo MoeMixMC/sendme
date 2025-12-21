@@ -1,0 +1,3 @@
+[install]
+# Don't use parent lockfile
+auto = "disable"
