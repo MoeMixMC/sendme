@@ -311,8 +311,9 @@
 
 .address-copyable {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   margin: -0.25rem -0.5rem;
@@ -322,6 +323,12 @@
 
 .address-copyable:hover {
   background: rgba(255, 255, 255, 0.05);
+}
+
+.address-copied {
+  font-size: 0.75rem;
+  color: var(--color-success);
+  font-weight: 500;
 }
 
 /* ========================================
@@ -571,4 +578,183 @@
 .empty-state-description {
   font-size: 0.875rem;
   color: var(--color-text-dim);
+}
+
+/* ========================================
+   SIDEBAR
+   ======================================== */
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--sidebar-width, 240px);
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid var(--color-border);
+  padding-top: calc(var(--header-height) + 1.5rem);
+  padding-bottom: 1.5rem;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+    color var(--transition-fast);
+  text-align: left;
+}
+
+.sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+}
+
+.sidebar-item-active {
+  background: rgba(79, 70, 229, 0.15);
+  color: var(--color-primary);
+  border-left: 3px solid var(--color-primary);
+  padding-left: calc(1.5rem - 3px);
+}
+
+.sidebar-item-active:hover {
+  background: rgba(79, 70, 229, 0.2);
+  color: var(--color-primary);
+}
+
+.sidebar-icon {
+  font-size: 1.125rem;
+  width: 1.5rem;
+  text-align: center;
+}
+
+.sidebar-label {
+  flex: 1;
+}
+
+/* ========================================
+   DASHBOARD LAYOUT
+   ======================================== */
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.dashboard-main {
+  flex: 1;
+  margin-left: var(--sidebar-width, 240px);
+}
+
+.dashboard-content {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: calc(var(--header-height) + 2rem) 1rem 2rem;
+}
+
+/* ========================================
+   PROFILE TAB
+   ======================================== */
+
+.profile-tab {
+  width: 100%;
+}
+
+.profile-card {
+  text-align: center;
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+
+.holdings-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--color-text);
+  margin-top: 0.5rem;
+}
+
+.holdings-eth {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+/* ========================================
+   RESPONSIVE SIDEBAR
+   ======================================== */
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    padding: 0;
+    border-right: none;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .sidebar-nav {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .sidebar-item {
+    flex-direction: column;
+    padding: 0.75rem 1rem;
+    gap: 0.25rem;
+  }
+
+  .sidebar-item-active {
+    border-left: none;
+    border-top: 3px solid var(--color-primary);
+    padding-left: 1rem;
+    padding-top: calc(0.75rem - 3px);
+  }
+
+  .sidebar-label {
+    font-size: 0.75rem;
+  }
+
+  .dashboard-main {
+    margin-left: 0;
+    margin-bottom: 70px;
+  }
 }

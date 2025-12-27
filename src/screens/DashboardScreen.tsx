@@ -2,25 +2,20 @@
  * DashboardScreen Component
  * =========================
  *
- * Main authenticated view with account info, balance, send form, and history.
+ * Main authenticated view with sidebar navigation and tab content.
  *
  * DESIGN DECISIONS
  * ----------------
+ * - Sidebar navigation for Transactions, Profile, Pay
+ * - Profile tab is the default (shows avatar + holdings in USD)
  * - Header shows balance and avatar (always visible)
- * - Account card with address and status
- * - Large balance display
- * - Send form below balance
- * - Transaction history
- * - Faucet link for testnet
- * - Logout at bottom
+ * - Logout button in sidebar footer
  */
 
 import React, { useEffect } from "react";
-import { Header, Container } from "../components/layout";
-import { Card, Button } from "../components/ui";
-import { AccountCard, BalanceDisplay } from "../components/account";
-import { SendForm } from "../components/forms";
-import { TransactionList } from "../components/transaction";
+import { Header, Sidebar } from "../components/layout";
+import { Button } from "../components/ui";
+import { ProfileTab, PayTab, TransactionsTab } from "../components/dashboard";
 import { useAccount, useBalance, useTransactionHistory } from "../hooks";
 import { useUIContext } from "../context";
 
@@ -31,23 +26,23 @@ const FAUCET_URL = "https://www.alchemy.com/faucets/base-sepolia";
  * DashboardScreen - Main authenticated view
  */
 export function DashboardScreen() {
-  const { goToWelcome } = useUIContext();
+  const { goToWelcome, dashboardTab } = useUIContext();
   const {
     account,
     isLoggedIn,
     logout: contextLogout,
     setBalance,
-    markDeployed,
   } = useAccount();
 
   // Fetch balance with polling
-  const { balance, isLoading: balanceLoading, refresh: refreshBalance } = useBalance(
+  const { balance, refresh: refreshBalance } = useBalance(
     account?.address ?? null
   );
 
   // Fetch transaction history with polling
-  const { transactions, isLoading: historyLoading, refresh: refreshHistory } =
-    useTransactionHistory(account?.address ?? null);
+  const { refresh: refreshHistory } = useTransactionHistory(
+    account?.address ?? null
+  );
 
   // Sync balance to context
   useEffect(() => {
@@ -58,8 +53,6 @@ export function DashboardScreen() {
 
   /**
    * Handle logout
-   *
-   * Clears context and navigates to welcome screen.
    */
   const handleLogout = () => {
     contextLogout();
@@ -68,8 +61,6 @@ export function DashboardScreen() {
 
   /**
    * Handle successful transaction
-   *
-   * Refreshes balance and history.
    */
   const handleTransactionSuccess = () => {
     refreshBalance();
@@ -81,52 +72,55 @@ export function DashboardScreen() {
     return null;
   }
 
+  /**
+   * Render the active tab content
+   */
+  const renderTabContent = () => {
+    switch (dashboardTab) {
+      case "profile":
+        return <ProfileTab />;
+      case "transactions":
+        return <TransactionsTab />;
+      case "pay":
+        return <PayTab onTransactionSuccess={handleTransactionSuccess} />;
+      default:
+        return <ProfileTab />;
+    }
+  };
+
   return (
-    <>
-      <Header />
+    <div className="dashboard-layout">
+      <Sidebar />
 
-      <Container withHeader>
-        {/* Account Card */}
-        <AccountCard account={account} className="mb-4" />
+      <div className="dashboard-main">
+        <Header />
 
-        {/* Balance Card */}
-        <Card animate="fade-in-up" className="mb-4">
-          <h2 className="card-title">Balance</h2>
-          <p className="card-subtitle mb-2">Base Sepolia Testnet</p>
-          <BalanceDisplay balance={balance} loading={balanceLoading} />
-        </Card>
+        <div className="dashboard-content">
+          {renderTabContent()}
 
-        {/* Send Form */}
-        <SendForm onSuccess={handleTransactionSuccess} />
+          {/* Faucet Link */}
+          <div className="section text-center mt-6">
+            <p className="text-sm text-muted">
+              Need testnet ETH?{" "}
+              <a
+                href={FAUCET_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link"
+              >
+                Get from faucet
+              </a>
+            </p>
+          </div>
 
-        {/* Transaction History */}
-        <TransactionList
-          transactions={transactions}
-          loading={historyLoading}
-        />
-
-        {/* Faucet Link */}
-        <div className="section text-center">
-          <p className="text-sm text-muted">
-            Need testnet ETH?{" "}
-            <a
-              href={FAUCET_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link"
-            >
-              Get from faucet
-            </a>
-          </p>
+          {/* Logout */}
+          <div className="section mt-4 mb-8">
+            <Button variant="tertiary" onClick={handleLogout}>
+              Logout
+            </Button>
+          </div>
         </div>
-
-        {/* Logout */}
-        <div className="section mt-6 mb-8">
-          <Button variant="tertiary" onClick={handleLogout}>
-            Logout
-          </Button>
-        </div>
-      </Container>
-    </>
+      </div>
+    </div>
   );
 }

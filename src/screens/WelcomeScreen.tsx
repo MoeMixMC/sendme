@@ -89,7 +89,7 @@ export function WelcomeScreen() {
           <h2 className="text-xl font-semibold mb-2">Welcome</h2>
           <p className="text-muted text-sm">
             Create a smart account secured by your device's biometrics.
-            No passwords, no seed phrases - just you.
+            No passwords, no 12-word seed phrases - just you.
           </p>
         </div>
 

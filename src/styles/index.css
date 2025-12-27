@@ -89,6 +89,7 @@
   /* Layout */
   --container-max-width: 480px;
   --header-height: 64px;
+  --sidebar-width: 240px;
 }
 
 /* ========================================
@@ -128,6 +129,12 @@ body {
   flex-direction: column;
   align-items: center;
   padding: var(--space-xl);
+}
+
+/* When dashboard layout is active, allow full width */
+#root:has(.dashboard-layout) {
+  align-items: stretch;
+  padding: 0;
 }
 
 /* ========================================
@@ -264,6 +271,10 @@ textarea {
 
 .mt-4 {
   margin-top: var(--space-xl);
+}
+
+.mt-6 {
+  margin-top: var(--space-2xl);
 }
 
 .mb-1 {

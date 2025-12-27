@@ -28,7 +28,7 @@ import React, {
   useEffect,
   type ReactNode,
 } from "react";
-import type { Screen, Status, StatusType } from "../types";
+import type { Screen, Status, StatusType, DashboardTab } from "../types";
 
 // ============================================
 // State & Action Types
@@ -37,6 +37,8 @@ import type { Screen, Status, StatusType } from "../types";
 interface UIState {
   /** Current screen being displayed */
   currentScreen: Screen;
+  /** Current tab within the dashboard */
+  dashboardTab: DashboardTab;
   /** Status message (auto-dismisses after timeout) */
   status: Status | null;
   /** Global loading overlay */
@@ -45,6 +47,7 @@ interface UIState {
 
 type UIAction =
   | { type: "SET_SCREEN"; payload: Screen }
+  | { type: "SET_DASHBOARD_TAB"; payload: DashboardTab }
   | { type: "SET_STATUS"; payload: Status | null }
   | { type: "SET_GLOBAL_LOADING"; payload: boolean };
 
@@ -58,6 +61,12 @@ interface UIContextValue extends UIState {
   goToWelcome: () => void;
   goToCreateAccount: () => void;
   goToDashboard: () => void;
+
+  // Dashboard tab navigation
+  setDashboardTab: (tab: DashboardTab) => void;
+  goToTransactions: () => void;
+  goToProfile: () => void;
+  goToPay: () => void;
 
   // Status messages
   showStatus: (type: StatusType, message: string) => void;
@@ -76,6 +85,7 @@ interface UIContextValue extends UIState {
 
 const initialState: UIState = {
   currentScreen: "welcome",
+  dashboardTab: "profile",
   status: null,
   isGlobalLoading: false,
 };
@@ -92,6 +102,12 @@ function uiReducer(state: UIState, action: UIAction): UIState {
         currentScreen: action.payload,
         // Clear status when changing screens (fresh start)
         status: null,
+      };
+
+    case "SET_DASHBOARD_TAB":
+      return {
+        ...state,
+        dashboardTab: action.payload,
       };
 
     case "SET_STATUS":
@@ -169,6 +185,22 @@ export function UIProvider({ children }: UIProviderProps) {
     dispatch({ type: "SET_SCREEN", payload: "dashboard" });
   }, []);
 
+  const setDashboardTab = useCallback((tab: DashboardTab) => {
+    dispatch({ type: "SET_DASHBOARD_TAB", payload: tab });
+  }, []);
+
+  const goToTransactions = useCallback(() => {
+    dispatch({ type: "SET_DASHBOARD_TAB", payload: "transactions" });
+  }, []);
+
+  const goToProfile = useCallback(() => {
+    dispatch({ type: "SET_DASHBOARD_TAB", payload: "profile" });
+  }, []);
+
+  const goToPay = useCallback(() => {
+    dispatch({ type: "SET_DASHBOARD_TAB", payload: "pay" });
+  }, []);
+
   const showStatus = useCallback((type: StatusType, message: string) => {
     dispatch({ type: "SET_STATUS", payload: { type, message } });
   }, []);
@@ -202,6 +234,10 @@ export function UIProvider({ children }: UIProviderProps) {
     goToWelcome,
     goToCreateAccount,
     goToDashboard,
+    setDashboardTab,
+    goToTransactions,
+    goToProfile,
+    goToPay,
     showStatus,
     showSuccess,
     showError,

@@ -57,7 +57,7 @@ export function AddressDisplay({
     try {
       await navigator.clipboard.writeText(address);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 1000);
     } catch (err) {
       console.error("Failed to copy:", err);
     }
@@ -80,9 +80,7 @@ export function AddressDisplay({
         type="button"
       >
         <span>{displayAddress}</span>
-        <span className="text-xs text-dim ml-1">
-          {copied ? "Copied!" : ""}
-        </span>
+        {copied && <span className="address-copied">Copied!</span>}
       </button>
     );
   }

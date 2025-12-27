@@ -24,6 +24,13 @@
 export type Screen = "welcome" | "createAccount" | "dashboard";
 
 /**
+ * DashboardTab - The current tab within the dashboard
+ *
+ * Used for sidebar navigation within the dashboard screen.
+ */
+export type DashboardTab = "transactions" | "profile" | "pay";
+
+/**
  * StatusType - Categories of status messages
  */
 export type StatusType = "success" | "error" | "info";
