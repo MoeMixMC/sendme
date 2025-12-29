@@ -63,7 +63,7 @@ export function ProfileTab() {
 
       {/* Holdings Card */}
       <Card animate="fade-in-up" className="mt-4">
-        <h3 className="card-title">Total Holdings</h3>
+        <h3 className="card-title">Balance</h3>
         <div className="holdings-value">{formattedUSD}</div>
         <p className="holdings-eth">{formattedETH} ETH</p>
       </Card>

@@ -2,12 +2,12 @@
  * TransactionsTab Component
  * =========================
  *
- * Shows transaction history.
+ * Shows transaction history split into Sent and Received sections.
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Card, Spinner } from "../ui";
-import { TransactionList } from "../transaction";
+import { TransactionItem } from "../transaction";
 import { useAccount, useTransactionHistory } from "../../hooks";
 
 /**
@@ -19,17 +19,39 @@ export function TransactionsTab() {
     account?.address ?? null
   );
 
-  return (
-    <div className="transactions-tab">
-      <h2 className="section-title">Transaction History</h2>
+  // Split transactions into sent and received
+  const { sent, received } = useMemo(() => {
+    const userAddress = account?.address?.toLowerCase();
+    if (!userAddress) return { sent: [], received: [] };
 
-      {isLoading && transactions.length === 0 ? (
+    return transactions.reduce(
+      (acc, tx) => {
+        if (tx.sender.toLowerCase() === userAddress) {
+          acc.sent.push(tx);
+        } else {
+          acc.received.push(tx);
+        }
+        return acc;
+      },
+      { sent: [] as typeof transactions, received: [] as typeof transactions }
+    );
+  }, [transactions, account?.address]);
+
+  if (isLoading && transactions.length === 0) {
+    return (
+      <div className="transactions-tab">
         <Card animate="fade-in-up">
           <div className="flex justify-center py-8">
             <Spinner size="lg" />
           </div>
         </Card>
-      ) : transactions.length === 0 ? (
+      </div>
+    );
+  }
+
+  if (transactions.length === 0) {
+    return (
+      <div className="transactions-tab">
         <Card animate="fade-in-up">
           <div className="empty-state">
             <div className="empty-state-icon">📋</div>
@@ -39,9 +61,57 @@ export function TransactionsTab() {
             </p>
           </div>
         </Card>
-      ) : (
-        <TransactionList transactions={transactions} loading={isLoading} />
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="transactions-tab">
+      {/* Sent Transactions */}
+      <div className="tx-section">
+        <h3 className="tx-section-title">
+          <span className="tx-section-icon">↑</span>
+          Sent
+        </h3>
+        {sent.length === 0 ? (
+          <Card animate="fade-in-up">
+            <p className="text-muted text-sm text-center py-4">No sent transactions</p>
+          </Card>
+        ) : (
+          <Card animate="fade-in-up">
+            {sent.map((tx, index) => (
+              <TransactionItem
+                key={tx.userOpHash || index}
+                transaction={tx}
+                direction="sent"
+              />
+            ))}
+          </Card>
+        )}
+      </div>
+
+      {/* Received Transactions */}
+      <div className="tx-section">
+        <h3 className="tx-section-title">
+          <span className="tx-section-icon">↓</span>
+          Received
+        </h3>
+        {received.length === 0 ? (
+          <Card animate="fade-in-up">
+            <p className="text-muted text-sm text-center py-4">No received transactions</p>
+          </Card>
+        ) : (
+          <Card animate="fade-in-up">
+            {received.map((tx, index) => (
+              <TransactionItem
+                key={tx.userOpHash || index}
+                transaction={tx}
+                direction="received"
+              />
+            ))}
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

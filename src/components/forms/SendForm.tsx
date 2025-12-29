@@ -14,7 +14,7 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import { Card, Button, StatusMessage } from "../ui";
-import { AddressInput } from "./AddressInput";
+import { RecipientInput } from "./RecipientInput";
 import { AmountInput } from "./AmountInput";
 import { useSendTransaction, useAccount } from "../../hooks";
 
@@ -105,10 +105,10 @@ export function SendForm({ onSuccess, className = "" }: SendFormProps) {
         <h3 className="section-title mb-4">Send ETH</h3>
 
         <div className="space-y-4">
-          <AddressInput
+          <RecipientInput
             value={recipient}
             onChange={setRecipient}
-            placeholder="Recipient address (0x...)"
+            placeholder="Username or 0x address"
             disabled={isSending}
           />
 

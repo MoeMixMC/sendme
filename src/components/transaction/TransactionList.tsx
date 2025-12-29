@@ -13,6 +13,8 @@ import type { Transaction } from "../../types";
 interface TransactionListProps {
   /** List of transactions */
   transactions: Transaction[];
+  /** Current user's address (to determine sent vs received) */
+  userAddress?: string;
   /** Loading state */
   loading?: boolean;
   /** Additional CSS classes */
@@ -23,10 +25,11 @@ interface TransactionListProps {
  * TransactionList - Transaction history display
  *
  * @example
- * <TransactionList transactions={txHistory} loading={isLoading} />
+ * <TransactionList transactions={txHistory} userAddress={account.address} loading={isLoading} />
  */
 export function TransactionList({
   transactions,
+  userAddress,
   loading = false,
   className = "",
 }: TransactionListProps) {
@@ -34,6 +37,14 @@ export function TransactionList({
   if (transactions.length === 0 && !loading) {
     return null;
   }
+
+  /**
+   * Determine direction based on sender
+   */
+  const getDirection = (tx: Transaction): "sent" | "received" => {
+    if (!userAddress) return "sent";
+    return tx.sender.toLowerCase() === userAddress.toLowerCase() ? "sent" : "received";
+  };
 
   return (
     <div className={`section ${className}`}>
@@ -54,6 +65,7 @@ export function TransactionList({
               <TransactionItem
                 key={tx.userOpHash || index}
                 transaction={tx}
+                direction={getDirection(tx)}
               />
             ))}
           </div>

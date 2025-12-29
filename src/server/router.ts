@@ -68,6 +68,7 @@ import {
   createUserOp,
   updateUserOpStatus,
   getUserOpsByAddress,
+  searchSmartAccounts,
 } from "../db";
 import { getSmartAccountAddress, FACTORY_ADDRESS } from "../account/factory";
 import {
@@ -455,6 +456,23 @@ export const appRouter = router({
     }),
 
   /**
+   * Search smart accounts by username prefix
+   * Returns matching accounts with last transaction context
+   * Used for autocomplete in send flows
+   */
+  searchSmartAccounts: publicProcedure
+    .input(
+      z.object({
+        query: z.string().min(1),
+        searcherAddress: addressSchema,
+        limit: z.number().min(1).max(10).default(5),
+      })
+    )
+    .query(async ({ input }) => {
+      return searchSmartAccounts(input.query, input.searcherAddress, input.limit);
+    }),
+
+  /**
    * Get account by credential ID (for login)
    *
    * When a user authenticates with their passkey, we get back the
@@ -817,6 +835,7 @@ export const appRouter = router({
   /**
    * Get UserOperation history for an address
    * Shows recent transactions (both as sender and recipient)
+   * Enriched with usernames from smart_accounts
    */
   getUserOpHistory: publicProcedure
     .input(
@@ -826,6 +845,22 @@ export const appRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return getUserOpsByAddress(input.address, input.limit);
+      const ops = await getUserOpsByAddress(input.address, input.limit);
+
+      const enriched = await Promise.all(
+        ops.map(async (op) => {
+          const [senderAccount, toAccount] = await Promise.all([
+            getSmartAccount(op.sender),
+            getSmartAccount(op.to_address),
+          ]);
+          return {
+            ...op,
+            sender_name: senderAccount?.name ?? null,
+            to_name: toAccount?.name ?? null,
+          };
+        })
+      );
+
+      return enriched;
     }),
 });

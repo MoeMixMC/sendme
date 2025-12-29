@@ -137,8 +137,12 @@ export interface UserOpRow {
   user_op_hash: string;
   /** Account that submitted the UserOp */
   sender: string;
+  /** Username of sender (from smart_accounts) */
+  sender_name: string | null;
   /** Recipient of the transfer */
   to_address: string;
+  /** Username of recipient (from smart_accounts) */
+  to_name: string | null;
   /** Amount transferred (ETH as string, e.g., "0.01") */
   value: string;
   /** Current status: pending, confirmed, or failed */
@@ -621,4 +625,69 @@ export async function getUserOpByHash(hash: string): Promise<UserOpRow | null> {
   `;
   const rows = Array.from(result) as UserOpRow[];
   return rows[0] || null;
+}
+
+/**
+ * Search result with transaction context
+ */
+export interface SmartAccountSearchResult {
+  address: string;
+  name: string;
+  lastTxType: 'sent' | 'received' | null;
+  lastTxTime: string | null;
+}
+
+/**
+ * Search smart accounts by username prefix
+ * Includes last transaction context with the searcher
+ */
+export async function searchSmartAccounts(
+  query: string,
+  searcherAddress: string,
+  limit = 5
+): Promise<SmartAccountSearchResult[]> {
+  const searcherAddr = searcherAddress.toLowerCase();
+  const queryLower = query.toLowerCase();
+
+  // Search for accounts matching the username prefix (excluding self)
+  const accounts = await sql`
+    SELECT address, name
+    FROM smart_accounts
+    WHERE name ILIKE ${queryLower + '%'}
+    AND address != ${searcherAddr}
+    ORDER BY name ASC
+    LIMIT ${limit}
+  `;
+
+  const results: SmartAccountSearchResult[] = [];
+
+  for (const account of accounts) {
+    const addr = (account as any).address;
+
+    // Find last transaction between searcher and this account
+    const lastTx = await sql`
+      SELECT
+        CASE
+          WHEN sender = ${searcherAddr} THEN 'sent'
+          ELSE 'received'
+        END as tx_type,
+        created_at
+      FROM user_ops
+      WHERE (sender = ${searcherAddr} AND to_address = ${addr})
+         OR (sender = ${addr} AND to_address = ${searcherAddr})
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+
+    const txRow = Array.from(lastTx)[0] as any;
+
+    results.push({
+      address: addr,
+      name: (account as any).name,
+      lastTxType: txRow?.tx_type || null,
+      lastTxTime: txRow?.created_at ? new Date(txRow.created_at).toISOString() : null,
+    });
+  }
+
+  return results;
 }

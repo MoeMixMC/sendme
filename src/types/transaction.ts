@@ -30,8 +30,12 @@ export interface Transaction {
   userOpHash: string;
   /** Sender smart account address */
   sender: string;
+  /** Sender username (if known) */
+  senderName: string | null;
   /** Recipient address */
   toAddress: string;
+  /** Recipient username (if known) */
+  toName: string | null;
   /** Amount sent (as decimal string, e.g., "0.01") */
   value: string;
   /** Current status */

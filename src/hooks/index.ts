@@ -9,3 +9,4 @@ export { useBalance } from "./useBalance";
 export { useTransactionHistory } from "./useTransactionHistory";
 export { useSendTransaction } from "./useSendTransaction";
 export { usePasskey } from "./usePasskey";
+export { useUserSearch } from "./useUserSearch";
